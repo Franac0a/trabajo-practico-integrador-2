@@ -33,7 +33,10 @@ const UserSchema = new Schema(
         type: String,
         match: /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/,
       },
-      birthDate: { type: Date },
+      birthDate: {
+        type: Date,
+        default: new Date(),
+      },
     },
   },
   { timestamps: { createdAt: "createdAt", updatedAt: "updated" } }
