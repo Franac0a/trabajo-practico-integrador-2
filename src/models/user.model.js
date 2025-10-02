@@ -1,7 +1,6 @@
-import mongoose from "mongoose";
-const { Schema } = mongoose;
+import { Schema, model } from "mongoose";
 
-const UserSchema = new Schema(
+const userSchema = new Schema(
   {
     username: {
       type: String,
@@ -13,33 +12,47 @@ const UserSchema = new Schema(
     email: {
       type: String,
       unique: true,
-      required: true,
-      match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+      match: /.+\@.+\..+/,
     },
-    password: {
-      type: String,
-      required: true,
-    },
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-    },
+    password: { type: String },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
     profile: {
       firstName: { type: String, minlength: 2, maxlength: 50, required: true },
       lastName: { type: String, minlength: 2, maxlength: 50, required: true },
       biography: { type: String, maxlength: 500 },
-      avatarUrl: {
-        type: String,
-        match: /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/,
-      },
-      birthDate: {
-        type: Date,
-        default: new Date(),
-      },
+      avatarUrl: { type: String },
+      birthDate: { type: Date, default: Date.now },
+      deletedAt: { type: Date, default: null },
     },
   },
-  { timestamps: { createdAt: "createdAt", updatedAt: "updated" } }
+  { timestamps: true, versionKey: false }
 );
 
-export const UserModel = model("User", UserSchema);
+//eliminacion en cascada
+userSchema.pre("findByIdAndUpdate", async (doc) => {
+  if (!doc) return;
+
+  if (doc.deletedAt !== null) {
+    const ArticleModel = model("Article");
+    const CommentModel = model("Comment");
+
+    await ArticleModel.deleteMany({ author: doc._id });
+    await CommentModel.deleteMany({ author: doc._id });
+  }
+});
+
+//para populates inversos
+userSchema.virtual("articles", {
+  ref: "Article",
+  localField: "_id",
+  foreignField: "author",
+});
+userSchema.virtual("comments", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "author",
+});
+
+userSchema.set("toJSON", { virtuals: true });
+
+export const userModel = model("User", userSchema);

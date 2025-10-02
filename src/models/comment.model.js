@@ -1,24 +1,12 @@
-import mongoose from "mongoose";
-const { Schema } = mongoose;
+import { Schema, Types, model } from "mongoose";
 
-const commentSchema = new Schema(
+const commetSchema = new Schema(
   {
-    content: {
-      type: String,
-      required: true,
-      minlength: 5,
-      maxlength: 500,
-    },
-    author: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-    article: {
-      type: Schema.Types.ObjectId,
-      ref: "Article",
-    },
+    content: { type: String, required: true, minlength: 5, maxlength: 500 },
+    author: { type: Types.ObjectId, ref: "User" },
+    article: { type: Types.ObjectId, ref: "Article" },
   },
-  { timestamps: { createdAt: "createdAt", updatedAt: "updated" } }
+  { timestamps: true, versionKey: false }
 );
 
-export const CommentModel = mongoose.model("Comment", commentSchema);
+export const commentModel = model("Comment", commetSchema);
