@@ -1,25 +1,18 @@
-import { verifyToken } from "../helpers/jwt.helper.js";
-
-export const authMiddleware = async (req, res, next) => {
+export const adminMiddleware = async (req, res, next) => {
   try {
-    const token = req.cookies["token"];
-
-    if (!token) {
-      return res
-        .status(401)
-        .json({ message: "no autenticado para realizar esta accion" });
+    //viene del middleware de auth el req.user
+    const user = req.user;
+    if (user.role !== "admin") {
+      return res.status(403).json({
+        ok: false,
+        message: "Usuario no auntenticado para realizar esta operacion",
+      });
     }
-
-    const decoded = verifyToken(token);
-
-    req.user = decoded;
-
     next();
   } catch (error) {
     console.log(error);
-    res.status(500).json({
-      msg: "error en el middleware de autenticacion",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ ok: false, message: "error interno en el servidor" });
   }
 };

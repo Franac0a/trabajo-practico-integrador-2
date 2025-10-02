@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
 
-const mongoose = require("mongoose");
-
-main().catch((err) => console.log(err));
-
-async function main() {
-  await mongoose.connect("mongodb://127.0.0.1:27017/test");
-}
+export const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI);
+    // await mongoose.connection.dropDatabase();
+    console.log("conexion exitosa a la bd");
+  } catch (error) {
+    console.log("error al conectar con la base de datos", error);
+  }
+};
